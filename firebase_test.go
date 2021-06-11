@@ -1,4 +1,4 @@
-package go_utils_test
+package firebase_tools_test
 
 import (
 	"context"
@@ -8,12 +8,13 @@ import (
 	"cloud.google.com/go/firestore"
 	"firebase.google.com/go/auth"
 	"github.com/google/uuid"
-	base "github.com/savannahghi/go_utils"
+	fb "github.com/savannahghi/firebase_tools"
+	"github.com/savannahghi/go_utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestInitFirebase(t *testing.T) {
-	fc := &base.FirebaseClient{}
+	fc := fb.FirebaseClient{}
 	fb, err := fc.InitFirebase()
 	assert.Nil(t, err)
 	assert.NotNil(t, fb)
@@ -21,19 +22,19 @@ func TestInitFirebase(t *testing.T) {
 
 func GetIDToken(t *testing.T) string {
 	ctx := context.Background()
-	user, err := base.GetOrCreateFirebaseUser(ctx, base.TestUserEmail)
+	user, err := fb.GetOrCreateFirebaseUser(ctx, fb.TestUserEmail)
 	if err != nil {
-		t.Errorf("unable to create Firebase user for email %v, error %v", base.TestUserEmail, err)
+		t.Errorf("unable to create Firebase user for email %v, error %v", fb.TestUserEmail, err)
 	}
 
 	// test custom token generation
-	customToken, err := base.CreateFirebaseCustomToken(ctx, user.UID)
+	customToken, err := fb.CreateFirebaseCustomToken(ctx, user.UID)
 	if err != nil {
 		t.Errorf("unable to get custom token for %#v", user)
 	}
 
 	// test authentication of custom Firebase tokens
-	idTokens, err := base.AuthenticateCustomFirebaseToken(customToken)
+	idTokens, err := fb.AuthenticateCustomFirebaseToken(customToken)
 	if err != nil {
 		t.Errorf("unable to exchange custom token for ID tokens, error %s", err)
 	}
@@ -48,10 +49,10 @@ func TestGetOrCreateFirebaseUser(t *testing.T) {
 	tests := []struct {
 		email string
 	}{
-		{email: base.TestUserEmail},
+		{email: fb.TestUserEmail},
 	}
 	for _, tc := range tests {
-		user, err := base.GetOrCreateFirebaseUser(ctx, tc.email)
+		user, err := fb.GetOrCreateFirebaseUser(ctx, tc.email)
 		if err != nil {
 			t.Errorf("unable to create Firebase user for email %v, error %v", tc.email, err)
 		}
@@ -62,13 +63,13 @@ func TestGetOrCreateFirebaseUser(t *testing.T) {
 		}
 
 		// test custom token generation
-		customToken, err := base.CreateFirebaseCustomToken(ctx, user.UID)
+		customToken, err := fb.CreateFirebaseCustomToken(ctx, user.UID)
 		if err != nil {
 			t.Errorf("unable to get custom token for %#v", user)
 		}
 
 		// test authentication of custom Firebase tokens
-		idTokens, err := base.AuthenticateCustomFirebaseToken(customToken)
+		idTokens, err := fb.AuthenticateCustomFirebaseToken(customToken)
 		if err != nil {
 			t.Errorf("unable to exchange custom token for ID tokens, error %s", err)
 		}
@@ -80,35 +81,35 @@ func TestGetOrCreateFirebaseUser(t *testing.T) {
 
 func TestAuthenticateCustomFirebaseToken_Invalid_Token(t *testing.T) {
 	invalidToken := uuid.New().String()
-	returnToken, err := base.AuthenticateCustomFirebaseToken(invalidToken)
+	returnToken, err := fb.AuthenticateCustomFirebaseToken(invalidToken)
 	assert.Errorf(t, err, "expected invalid token to fail authentication with message %s")
-	var nilToken *base.FirebaseUserTokens
+	var nilToken *fb.FirebaseUserTokens
 	assert.Equal(t, nilToken, returnToken)
 }
 
 func TestAuthenticateCustomFirebaseToken_Valid_Token(t *testing.T) {
 	ctx := context.Background()
-	user, err := base.GetOrCreateFirebaseUser(ctx, base.TestUserEmail)
+	user, err := fb.GetOrCreateFirebaseUser(ctx, fb.TestUserEmail)
 	assert.Nilf(t, err, "unexpected user retrieval error '%s'")
-	validToken, tokenErr := base.CreateFirebaseCustomToken(ctx, user.UID)
+	validToken, tokenErr := fb.CreateFirebaseCustomToken(ctx, user.UID)
 	assert.Nilf(t, tokenErr, "unexpected custom token creation error '%s'")
-	idTokens, validateErr := base.AuthenticateCustomFirebaseToken(validToken)
+	idTokens, validateErr := fb.AuthenticateCustomFirebaseToken(validToken)
 	assert.Nilf(t, validateErr, "unexpected custom token validation/exchange error '%s'")
 	assert.NotNilf(t, idTokens.IDToken, "expected ID token to be non nil")
 }
 
 func TestGenerateSafeIdentifier(t *testing.T) {
-	id := base.GenerateSafeIdentifier()
+	id := fb.GenerateSafeIdentifier()
 	assert.NotZero(t, id)
 }
 
 func TestUpdateRecordOnFirestore(t *testing.T) {
-	firestoreClient := GetFirestoreClient(t)
+	firestoreClient := fb.GetFirestoreClient(t)
 	collection := "integration_test_collection"
 	data := map[string]string{
 		"a_key_for_testing": uuid.New().String(),
 	}
-	id, err := base.SaveDataToFirestore(firestoreClient, collection, data)
+	id, err := fb.SaveDataToFirestore(firestoreClient, collection, data)
 	assert.Nil(t, err)
 	assert.NotZero(t, id)
 
@@ -150,7 +151,7 @@ func TestUpdateRecordOnFirestore(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := base.UpdateRecordOnFirestore(tt.args.firestoreClient, tt.args.collection, tt.args.id, tt.args.data); (err != nil) != tt.wantErr {
+			if err := fb.UpdateRecordOnFirestore(tt.args.firestoreClient, tt.args.collection, tt.args.id, tt.args.data); (err != nil) != tt.wantErr {
 				t.Errorf("UpdateRecordOnFirestore() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -158,7 +159,7 @@ func TestUpdateRecordOnFirestore(t *testing.T) {
 }
 
 func TestGetUserTokenFromContext(t *testing.T) {
-	authenticatedContext, authToken := base.GetAuthenticatedContextAndToken(t)
+	authenticatedContext, authToken := go_utils.GetAuthenticatedContextAndToken(t)
 	type args struct {
 		ctx context.Context
 	}
@@ -189,7 +190,7 @@ func TestGetUserTokenFromContext(t *testing.T) {
 			args: args{
 				ctx: context.WithValue(
 					context.Background(),
-					base.AuthTokenContextKey,
+					fb.AuthTokenContextKey,
 					"this is definitely not an auth token",
 				),
 			},
@@ -199,7 +200,7 @@ func TestGetUserTokenFromContext(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := base.GetUserTokenFromContext(tt.args.ctx)
+			got, err := fb.GetUserTokenFromContext(tt.args.ctx)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetUserTokenFromContext() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -224,7 +225,7 @@ func TestCheckIsAnonymousUser(t *testing.T) {
 		{
 			name: "Anonymous user",
 			args: args{
-				ctx: base.GetAnonymousContext(t),
+				ctx: go_utils.GetAnonymousContext(t),
 			},
 			want:    true,
 			wantErr: false,
@@ -232,7 +233,7 @@ func TestCheckIsAnonymousUser(t *testing.T) {
 		{
 			name: "Known user",
 			args: args{
-				ctx: base.GetAuthenticatedContext(t),
+				ctx: go_utils.GetAuthenticatedContext(t),
 			},
 			want:    false,
 			wantErr: false,
@@ -240,7 +241,7 @@ func TestCheckIsAnonymousUser(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := base.CheckIsAnonymousUser(tt.args.ctx)
+			got, err := fb.CheckIsAnonymousUser(tt.args.ctx)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("CheckIsAnonymousUser() error = %v, wantErr %v", err, tt.wantErr)
 				return

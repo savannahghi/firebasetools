@@ -1,4 +1,4 @@
-package go_utils
+package firebase_tools
 
 import (
 	"context"

@@ -1,4 +1,4 @@
-package go_utils_test
+package firebase_tools_test
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/firestore"
+	fb "github.com/savannahghi/firebase_tools"
 	base "github.com/savannahghi/go_utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -26,14 +27,14 @@ func (d Dummy) SetID(string) {}
 func TestSuffixCollection_staging(t *testing.T) {
 	col := "otp"
 	expect := fmt.Sprintf("%v_bewell_%v", col, "staging")
-	s := base.SuffixCollection(col)
+	s := fb.SuffixCollection(col)
 	assert.Equal(t, expect, s)
 }
 
 func TestServiceSuffixCollection_testing(t *testing.T) {
 	col := "otp"
 	expect := fmt.Sprintf("%v_bewell_%v", col, "staging")
-	s := base.SuffixCollection(col)
+	s := fb.SuffixCollection(col)
 	assert.Equal(t, expect, s)
 }
 
@@ -756,7 +757,7 @@ func TestDeleteNode(t *testing.T) {
 
 func TestDeleteCollection(t *testing.T) {
 	ctx := base.GetAuthenticatedContext(t)
-	firestoreClient := GetFirestoreClient(t)
+	firestoreClient := fb.GetFirestoreClient(t)
 	collection := "test_collection_deletion"
 	data := map[string]string{
 		"a_key_for_testing": "random-test-key-value",

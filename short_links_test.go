@@ -1,15 +1,16 @@
-package go_utils_test
+package firebase_tools_test
 
 import (
 	"context"
 	"testing"
 
-	base "github.com/savannahghi/go_utils"
+	fb "github.com/savannahghi/firebase_tools"
+	"github.com/savannahghi/server_utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestShortenLink(t *testing.T) {
-	dynamicLinkDomain, err := base.GetEnvVar(base.FDLDomainEnvironmentVariableName)
+	dynamicLinkDomain, err := server_utils.GetEnvVar(fb.FDLDomainEnvironmentVariableName)
 	assert.Nil(t, err)
 
 	type args struct {
@@ -33,7 +34,7 @@ func TestShortenLink(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := base.ShortenLink(tt.args.ctx, tt.args.longLink)
+			got, err := fb.ShortenLink(tt.args.ctx, tt.args.longLink)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ShortenLink() error = %v, wantErr %v", err, tt.wantErr)
 				return
