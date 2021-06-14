@@ -3,6 +3,8 @@ package firebase_tools_test
 import (
 	"context"
 	"fmt"
+	"log"
+	"os"
 	"reflect"
 	"testing"
 
@@ -10,8 +12,46 @@ import (
 	"firebase.google.com/go/auth"
 	"github.com/google/uuid"
 	fb "github.com/savannahghi/firebase_tools"
+	"github.com/savannahghi/server_utils"
 	"github.com/stretchr/testify/assert"
 )
+
+// CoverageThreshold sets the test coverage threshold below which the tests will fail
+const CoverageThreshold = 0.74
+
+func TestMain(m *testing.M) {
+	os.Setenv("MESSAGE_KEY", "this-is-a-test-key$$$")
+	os.Setenv("ENVIRONMENT", "staging")
+	err := os.Setenv("ROOT_COLLECTION_SUFFIX", "staging")
+	if err != nil {
+		if server_utils.IsDebug() {
+			log.Printf("can't set root collection suffix in env: %s", err)
+		}
+		os.Exit(-1)
+	}
+	existingDebug, err := server_utils.GetEnvVar("DEBUG")
+	if err != nil {
+		existingDebug = "false"
+	}
+
+	os.Setenv("DEBUG", "true")
+
+	rc := m.Run()
+	// Restore DEBUG envar to original value after running test
+	os.Setenv("DEBUG", existingDebug)
+
+	// rc 0 means we've passed,
+	// and CoverMode will be non empty if run with -cover
+	if rc == 0 && testing.CoverMode() != "" {
+		c := testing.Coverage()
+		if c < CoverageThreshold {
+			fmt.Println("Tests passed but coverage failed at", c)
+			rc = -1
+		}
+	}
+
+	os.Exit(rc)
+}
 
 func TestInitFirebase(t *testing.T) {
 	fc := fb.FirebaseClient{}
@@ -49,15 +89,6 @@ func GetAuthenticatedContextAndToken(t *testing.T) (context.Context, *auth.Token
 	return authenticatedContext, authToken
 }
 
-// GetAuthenticatedContextAndBearerToken returns a logged in context and bearer token.
-// It is useful for test purposes
-func GetAuthenticatedContextAndBearerToken(t *testing.T) (context.Context, string) {
-	ctx := context.Background()
-	authToken, bearerToken := getAuthTokenAndBearerToken(ctx, t)
-	authenticatedContext := context.WithValue(ctx, fb.AuthTokenContextKey, authToken)
-	return authenticatedContext, bearerToken
-}
-
 func getAuthToken(ctx context.Context, t *testing.T) *auth.Token {
 	authToken, _ := getAuthTokenAndBearerToken(ctx, t)
 	return authToken
@@ -82,30 +113,6 @@ func getAuthTokenAndBearerToken(ctx context.Context, t *testing.T) (*auth.Token,
 	assert.NotNil(t, authToken)
 
 	return authToken, bearerToken
-}
-
-func GetIDToken(t *testing.T) string {
-	ctx := context.Background()
-	user, err := fb.GetOrCreateFirebaseUser(ctx, fb.TestUserEmail)
-	if err != nil {
-		t.Errorf("unable to create Firebase user for email %v, error %v", fb.TestUserEmail, err)
-	}
-
-	// test custom token generation
-	customToken, err := fb.CreateFirebaseCustomToken(ctx, user.UID)
-	if err != nil {
-		t.Errorf("unable to get custom token for %#v", user)
-	}
-
-	// test authentication of custom Firebase tokens
-	idTokens, err := fb.AuthenticateCustomFirebaseToken(customToken)
-	if err != nil {
-		t.Errorf("unable to exchange custom token for ID tokens, error %s", err)
-	}
-	if idTokens.IDToken == "" {
-		t.Errorf("got blank ID token")
-	}
-	return idTokens.IDToken
 }
 
 func GetOrCreateAnonymousUser(ctx context.Context) (*auth.UserRecord, error) {

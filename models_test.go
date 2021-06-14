@@ -71,7 +71,7 @@ func TestMarshalID(t *testing.T) {
 				id: "1",
 				n:  &fb.Model{},
 			},
-			want: fb.IDValue("MXwqYmFzZS5Nb2RlbA=="),
+			want: fb.IDValue("MXwqZmlyZWJhc2VfdG9vbHMuTW9kZWw="),
 		},
 	}
 	for _, tt := range tests {
