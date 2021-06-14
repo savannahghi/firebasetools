@@ -9,7 +9,6 @@ import (
 
 	"cloud.google.com/go/firestore"
 	"github.com/google/uuid"
-	"github.com/savannahghi/go_utils"
 	"github.com/savannahghi/server_utils"
 	"google.golang.org/api/iterator"
 )
@@ -19,7 +18,7 @@ import (
 var UnixEpoch = time.Unix(0, 0)
 
 // GetCollectionName calculates the name to give to a node's collection on Firestore
-func GetCollectionName(n go_utils.Node) string {
+func GetCollectionName(n Node) string {
 	fullName := fmt.Sprintf("%T", n) // e.g "*authorization.Store"
 	split := strings.Split(fullName, ".")
 	lastPart := split[len(split)-1]
@@ -38,7 +37,7 @@ func SuffixCollection(c string) string {
 }
 
 // ValidatePaginationParameters ensures that the supplied pagination parameters make sense
-func ValidatePaginationParameters(pagination *go_utils.PaginationInput) error {
+func ValidatePaginationParameters(pagination *PaginationInput) error {
 	if pagination == nil {
 		return nil // not having pagination is not a fatal error
 	}
@@ -53,21 +52,21 @@ func ValidatePaginationParameters(pagination *go_utils.PaginationInput) error {
 
 // OpString translates between an Operation enum value and the appropriate firestore
 // query operator
-func OpString(op go_utils.Operation) (string, error) {
+func OpString(op Operation) (string, error) {
 	switch op {
-	case go_utils.OperationLessThan:
+	case OperationLessThan:
 		return "<", nil
-	case go_utils.OperationLessThanOrEqualTo:
+	case OperationLessThanOrEqualTo:
 		return "<=", nil
-	case go_utils.OperationEqual:
+	case OperationEqual:
 		return "==", nil
-	case go_utils.OperationGreaterThan:
+	case OperationGreaterThan:
 		return ">", nil
-	case go_utils.OperationGreaterThanOrEqualTo:
+	case OperationGreaterThanOrEqualTo:
 		return ">=", nil
-	case go_utils.OperationIn:
+	case OperationIn:
 		return "in", nil
-	case go_utils.OperationContains:
+	case OperationContains:
 		return "array-contains", nil
 	default:
 		return "", fmt.Errorf("unknown operation; did you forget to update this function after adding new operations in the schema?")
@@ -91,9 +90,9 @@ func GetFirestoreClient(ctx context.Context) (*firestore.Client, error) {
 // ComposeUnpaginatedQuery creates a Cloud Firestore query
 func ComposeUnpaginatedQuery(
 	ctx context.Context,
-	filter *go_utils.FilterInput,
-	sort *go_utils.SortInput,
-	node go_utils.Node,
+	filter *FilterInput,
+	sort *SortInput,
+	node Node,
 ) (*firestore.Query, error) {
 	collectionName := GetCollectionName(node)
 	firestoreClient, err := GetFirestoreClient(ctx)
@@ -111,7 +110,7 @@ func ComposeUnpaginatedQuery(
 			}
 
 			switch filterParam.FieldType {
-			case go_utils.FieldTypeBoolean:
+			case FieldTypeBoolean:
 				boolFilterVal, ok := filterParam.FieldValue.(string)
 				if !ok {
 					return nil, fmt.Errorf("a boolean filter value should be the string 'true' or the string 'false'")
@@ -121,18 +120,18 @@ func ComposeUnpaginatedQuery(
 					return nil, err
 				}
 				query = query.Where(filterParam.FieldName, op, parsed)
-			case go_utils.FieldTypeInteger:
+			case FieldTypeInteger:
 				intFilterValue, ok := filterParam.FieldValue.(int)
 				if !ok {
 					return nil, fmt.Errorf("expected the filter value to be an int")
 				}
 				query = query.Where(filterParam.FieldName, op, intFilterValue)
-			case go_utils.FieldTypeTimestamp:
+			case FieldTypeTimestamp:
 				// a future decision on timestamp formats would affect this
 				query = query.Where(filterParam.FieldName, op, filterParam.FieldValue)
-			case go_utils.FieldTypeNumber:
+			case FieldTypeNumber:
 				query = query.Where(filterParam.FieldName, op, filterParam.FieldValue)
-			case go_utils.FieldTypeString:
+			case FieldTypeString:
 				query = query.Where(filterParam.FieldName, op, filterParam.FieldValue)
 			default:
 				return nil, fmt.Errorf("unexpected field type '%s'", filterParam.FieldType.String())
@@ -143,9 +142,9 @@ func ComposeUnpaginatedQuery(
 	if sort != nil {
 		for _, sortParam := range sort.SortBy {
 			switch sortParam.SortOrder {
-			case go_utils.SortOrderAsc:
+			case SortOrderAsc:
 				query = query.OrderBy(sortParam.FieldName, firestore.Asc)
-			case go_utils.SortOrderDesc:
+			case SortOrderDesc:
 				query = query.OrderBy(sortParam.FieldName, firestore.Desc)
 			}
 		}
@@ -155,8 +154,8 @@ func ComposeUnpaginatedQuery(
 
 // QueryNodes prepares and executes queries against Firebase collections
 func QueryNodes(
-	ctx context.Context, pagination *go_utils.PaginationInput,
-	filter *go_utils.FilterInput, sort *go_utils.SortInput, node go_utils.Node) ([]*firestore.DocumentSnapshot, *go_utils.PageInfo, error) {
+	ctx context.Context, pagination *PaginationInput,
+	filter *FilterInput, sort *SortInput, node Node) ([]*firestore.DocumentSnapshot, *PageInfo, error) {
 	queryPtr, err := ComposeUnpaginatedQuery(ctx, filter, sort, node)
 	if err != nil {
 		return nil, nil, err
@@ -164,7 +163,7 @@ func QueryNodes(
 	query := *queryPtr
 
 	// pagination
-	pageSize := go_utils.DefaultPageSize
+	pageSize := DefaultPageSize
 	if pagination != nil {
 		if pagination.First > 0 {
 			if pagination.After != "" {
@@ -193,7 +192,7 @@ func QueryNodes(
 	}
 
 	// check if there is a next page
-	pageInfo := &go_utils.PageInfo{
+	pageInfo := &PageInfo{
 		HasPreviousPage: pagination != nil && pagination.After != "",
 	}
 	if len(docs) > 0 {
@@ -220,7 +219,7 @@ func QueryNodes(
 }
 
 // RetrieveNode retrieves a node from Firestore
-func RetrieveNode(ctx context.Context, id string, node go_utils.Node) (go_utils.Node, error) {
+func RetrieveNode(ctx context.Context, id string, node Node) (Node, error) {
 	collName := GetCollectionName(node)
 	firestoreClient, err := GetFirestoreClient(ctx)
 	if err != nil {
@@ -238,7 +237,7 @@ func RetrieveNode(ctx context.Context, id string, node go_utils.Node) (go_utils.
 }
 
 // DeleteNode retrieves a node from Firestore
-func DeleteNode(ctx context.Context, id string, node go_utils.Node) (bool, error) {
+func DeleteNode(ctx context.Context, id string, node Node) (bool, error) {
 	collName := GetCollectionName(node)
 	firestoreClient, err := GetFirestoreClient(ctx)
 	if err != nil {
@@ -252,7 +251,7 @@ func DeleteNode(ctx context.Context, id string, node go_utils.Node) (bool, error
 }
 
 // CreateNode creates a Node on Firebase
-func CreateNode(ctx context.Context, node go_utils.Node) (string, time.Time, error) {
+func CreateNode(ctx context.Context, node Node) (string, time.Time, error) {
 	collectionName := GetCollectionName(node)
 	firestoreClient, err := GetFirestoreClient(ctx)
 	if err != nil {
@@ -275,7 +274,7 @@ func CreateNode(ctx context.Context, node go_utils.Node) (string, time.Time, err
 }
 
 // UpdateNode updates an existing node's document on Firestore
-func UpdateNode(ctx context.Context, id string, node go_utils.Node) (time.Time, error) {
+func UpdateNode(ctx context.Context, id string, node Node) (time.Time, error) {
 	collName := GetCollectionName(node)
 	firestoreClient, err := GetFirestoreClient(ctx)
 	if err != nil {

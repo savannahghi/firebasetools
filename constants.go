@@ -29,9 +29,11 @@ const (
 
 	// e.g https://healthcloud.page.link or https://bwl.page.link
 	FDLDomainEnvironmentVariableName = "FIREBASE_DYNAMIC_LINKS_DOMAIN"
-)
 
-// ContextKey is used as a type for the UID key for the Firebase *auth.Token on context.Context.
-// It is a custom type in order to minimize context key collissions on the context
-// (.and to shut up golint).
-type ContextKey string
+	// DefaultPageSize is used to paginate records (e.g those fetched from Firebase)
+	// if there is no user specified page size
+	DefaultPageSize = 100
+
+	// Sep is a separator, used to create "opaque" IDs
+	Sep = "|"
+)
