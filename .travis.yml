@@ -65,3 +65,6 @@ script:
   - tail coverage_report.txt
   # - ineffassign ./*  # identify ineffective assignments
   - "gocyclo -over 5 . || :" # display the most complex functions but do not fail the build because of this
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
