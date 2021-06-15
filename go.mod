@@ -1,4 +1,4 @@
-module github.com/savannahghi/firebase_tools
+module github.com/savannahghi/firebasetools
 
 go 1.16
 

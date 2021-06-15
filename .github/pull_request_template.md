@@ -33,6 +33,7 @@
 - [ ] Approved by Czar {replace_with_czar_name}
 - [ ] Signed off by second reviewer {replace_with_name}
 - [ ] Ensure all checks are done before merging :warning:
+- [ ] All PRs needs to be signed before merging :warning:
 
 #### N/B:
 

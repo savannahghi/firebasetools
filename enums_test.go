@@ -1,11 +1,11 @@
-package firebase_tools_test
+package firebasetools_test
 
 import (
 	"bytes"
 	"strconv"
 	"testing"
 
-	fb "github.com/savannahghi/firebase_tools"
+	fb "github.com/savannahghi/firebasetools"
 )
 
 func TestFieldType_IsValid(t *testing.T) {

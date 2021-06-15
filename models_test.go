@@ -1,10 +1,10 @@
-package firebase_tools_test
+package firebasetools_test
 
 import (
 	"reflect"
 	"testing"
 
-	fb "github.com/savannahghi/firebase_tools"
+	fb "github.com/savannahghi/firebasetools"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -71,7 +71,7 @@ func TestMarshalID(t *testing.T) {
 				id: "1",
 				n:  &fb.Model{},
 			},
-			want: fb.IDValue("MXwqZmlyZWJhc2VfdG9vbHMuTW9kZWw="),
+			want: fb.IDValue("MXwqZmlyZWJhc2V0b29scy5Nb2RlbA=="),
 		},
 	}
 	for _, tt := range tests {

@@ -1,4 +1,4 @@
-package firebase_tools_test
+package firebasetools_test
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/firestore"
-	fb "github.com/savannahghi/firebase_tools"
+	fb "github.com/savannahghi/firebasetools"
 	"github.com/stretchr/testify/assert"
 )
 

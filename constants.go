@@ -1,4 +1,4 @@
-package firebase_tools
+package firebasetools
 
 const (
 
