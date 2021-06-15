@@ -22,12 +22,14 @@ const (
 	// AuthTokenContextKey is used to add/retrieve the Firebase UID on the context
 	AuthTokenContextKey = ContextKey("UID")
 
-	// HTTP client settings
+	// HTTPClientTimeoutSecs is used to set HTTP client Timeout setting for a request
 	HTTPClientTimeoutSecs = 10
+
 	// TestUserEmail is used by integration tests
 	TestUserEmail = "be.well@bewell.co.ke"
 
-	// e.g https://healthcloud.page.link or https://bwl.page.link
+	// FDLDomainEnvironmentVariableName is firebase dynamic link domain/URL
+	// e.g https://example-one.page.link or https://example-two.page.link
 	FDLDomainEnvironmentVariableName = "FIREBASE_DYNAMIC_LINKS_DOMAIN"
 
 	// DefaultPageSize is used to paginate records (e.g those fetched from Firebase)

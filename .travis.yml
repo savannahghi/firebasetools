@@ -2,6 +2,10 @@ dist: bionic
 
 language: go
 
+sudo: required
+services:
+  - docker
+
 # You don't need to test on very old versions of the Go compiler. It's the user's
 # responsibility to keep their compiler up to date.
 go:
@@ -29,6 +33,15 @@ env:
 # We can download and extract the golangci-lint binary in one (long) command.
 before_script:
   - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.37.1
+  - go get -u github.com/kisielk/errcheck
+  - go get -u golang.org/x/lint/golint
+  - go get -u honnef.co/go/tools/cmd/staticcheck
+  - go get -u github.com/axw/gocov/gocov
+  - go get -u github.com/securego/gosec/cmd/gosec
+  - go get -u github.com/ory/go-acc
+  - go get -u github.com/client9/misspell/cmd/misspell
+  - go get -u github.com/gordonklaus/ineffassign
+  - go get github.com/fzipp/gocyclo
 
 before_install:
   - openssl aes-256-cbc -K $encrypted_2677e8e89b3e_key -iv $encrypted_2677e8e89b3e_iv -in bewell-app-ci-account.json.enc -out bewell-app-ci-account.json -d
@@ -37,5 +50,18 @@ before_install:
 # failing test, we want to see both. Configure golangci-lint with a
 # .golangci.yml file at the top level of your repo.
 script:
-  - golangci-lint run       # run a bunch of code checkers/linters in parallel
-  - go test -v -race ./...  # Run all the tests with the race detector enabled
+  - staticcheck ./...
+  - go fmt $(go list ./... | grep -v /vendor/)
+  - go vet $(go list ./... | grep -v /vendor/)
+  - golint -set_exit_status $(go list ./... | grep -v /vendor/)
+  - errcheck -ignore 'os:.*,' $(go list ./... | grep -v /vendor/)
+  - misspell -error .
+  - gosec -exclude=G304,G101 ./...
+  - go-acc -o coverage.txt --ignore generated,cmd,graph ./... 
+  - grep -v "generated.go" coverage.txt | grep -v "_gen.go" | grep -v "mocks.go" > coverage.out
+  - go tool cover -html=coverage.out -o coverage.html
+  - gocov convert coverage.out > coverage.json
+  - gocov report coverage.json > coverage_report.txt
+  - tail coverage_report.txt
+  # - ineffassign ./*  # identify ineffective assignments
+  - "gocyclo -over 5 . || :" # display the most complex functions but do not fail the build because of this
