@@ -38,4 +38,8 @@ const (
 
 	// Sep is a separator, used to create "opaque" IDs
 	Sep = "|"
+
+	// DefaultRESTAPIPageSize is the page size to use when calling Slade REST API services if the
+	// client does not specify a page size
+	DefaultRESTAPIPageSize = 100
 )
