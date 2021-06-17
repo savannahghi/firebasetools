@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
+	"strconv"
 )
 
 // CloseRespBody closes the body of the supplied HTTP response
@@ -60,4 +62,47 @@ type UserInfo struct {
 	// In UserRecord.UserInfo it will return the constant string "firebase".
 	ProviderID string `json:"providerId,omitempty"`
 	UID        string `json:"rawId,omitempty"`
+}
+
+// GetAPIPaginationParams composes pagination parameters for use by a REST API that uses
+// offset based pagination
+func GetAPIPaginationParams(pagination *PaginationInput) (url.Values, error) {
+	if pagination == nil {
+		return url.Values{}, nil
+	}
+
+	// Treat first or last, when set, literally as page sizes
+	// We intentionally "demote" `last`; if both `first` and `last` are specified,
+	// `first` will supersede `last`
+	var err error
+	pageSize := DefaultRESTAPIPageSize
+	if pagination.Last > 0 {
+		pageSize = pagination.Last
+	}
+	if pagination.First > 0 {
+		pageSize = pagination.First
+	}
+
+	// For these "pass through APIs", "after" and "before" should be parseable as ints
+	// (literal offsets).
+	// We intentionally demote `before` i.e if both `before` and `after` are set,
+	// `after` will supersede `before`
+	offset := 0
+	if pagination.Before != "" {
+		offset, err = strconv.Atoi(pagination.Before)
+		if err != nil {
+			return url.Values{}, fmt.Errorf("expected `before` to be parseable as an int; got %s", pagination.Before)
+		}
+	}
+	if pagination.After != "" {
+		offset, err = strconv.Atoi(pagination.After)
+		if err != nil {
+			return url.Values{}, fmt.Errorf("expected `after` to be parseable as an int; got %s", pagination.After)
+		}
+	}
+	page := int(offset/pageSize) + 1 // page numbers are one based
+	values := url.Values{}
+	values.Set("page", fmt.Sprintf("%d", page))
+	values.Set("page_size", fmt.Sprintf("%d", pageSize))
+	return values, nil
 }
