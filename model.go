@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
+	"github.com/savannahghi/enumutils"
 )
 
 // QueryParam is an interface used for filter and sort parameters
@@ -36,8 +37,8 @@ func (s SortInput) IsEntity() {}
 
 // SortParam represents a single field sort parameter
 type SortParam struct {
-	FieldName string    `json:"fieldName"`
-	SortOrder SortOrder `json:"sortOrder"`
+	FieldName string              `json:"fieldName"`
+	SortOrder enumutils.SortOrder `json:"sortOrder"`
 }
 
 //IsEntity ...
@@ -54,10 +55,10 @@ func (f FilterInput) IsEntity() {}
 
 // FilterParam represents a single field filter parameter
 type FilterParam struct {
-	FieldName           string      `json:"fieldName"`
-	FieldType           FieldType   `json:"fieldType"`
-	ComparisonOperation Operation   `json:"comparisonOperation"`
-	FieldValue          interface{} `json:"fieldValue"`
+	FieldName           string              `json:"fieldName"`
+	FieldType           enumutils.FieldType `json:"fieldType"`
+	ComparisonOperation enumutils.Operation `json:"comparisonOperation"`
+	FieldValue          interface{}         `json:"fieldValue"`
 }
 
 //IsEntity ...
