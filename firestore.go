@@ -9,6 +9,7 @@ import (
 
 	"cloud.google.com/go/firestore"
 	"github.com/google/uuid"
+	"github.com/savannahghi/enumutils"
 	"github.com/savannahghi/server_utils"
 	"google.golang.org/api/iterator"
 )
@@ -52,21 +53,21 @@ func ValidatePaginationParameters(pagination *PaginationInput) error {
 
 // OpString translates between an Operation enum value and the appropriate firestore
 // query operator
-func OpString(op Operation) (string, error) {
+func OpString(op enumutils.Operation) (string, error) {
 	switch op {
-	case OperationLessThan:
+	case enumutils.OperationLessThan:
 		return "<", nil
-	case OperationLessThanOrEqualTo:
+	case enumutils.OperationLessThanOrEqualTo:
 		return "<=", nil
-	case OperationEqual:
+	case enumutils.OperationEqual:
 		return "==", nil
-	case OperationGreaterThan:
+	case enumutils.OperationGreaterThan:
 		return ">", nil
-	case OperationGreaterThanOrEqualTo:
+	case enumutils.OperationGreaterThanOrEqualTo:
 		return ">=", nil
-	case OperationIn:
+	case enumutils.OperationIn:
 		return "in", nil
-	case OperationContains:
+	case enumutils.OperationContains:
 		return "array-contains", nil
 	default:
 		return "", fmt.Errorf("unknown operation; did you forget to update this function after adding new operations in the schema?")
@@ -110,7 +111,7 @@ func ComposeUnpaginatedQuery(
 			}
 
 			switch filterParam.FieldType {
-			case FieldTypeBoolean:
+			case enumutils.FieldTypeBoolean:
 				boolFilterVal, ok := filterParam.FieldValue.(string)
 				if !ok {
 					return nil, fmt.Errorf("a boolean filter value should be the string 'true' or the string 'false'")
@@ -120,18 +121,18 @@ func ComposeUnpaginatedQuery(
 					return nil, err
 				}
 				query = query.Where(filterParam.FieldName, op, parsed)
-			case FieldTypeInteger:
+			case enumutils.FieldTypeInteger:
 				intFilterValue, ok := filterParam.FieldValue.(int)
 				if !ok {
 					return nil, fmt.Errorf("expected the filter value to be an int")
 				}
 				query = query.Where(filterParam.FieldName, op, intFilterValue)
-			case FieldTypeTimestamp:
+			case enumutils.FieldTypeTimestamp:
 				// a future decision on timestamp formats would affect this
 				query = query.Where(filterParam.FieldName, op, filterParam.FieldValue)
-			case FieldTypeNumber:
+			case enumutils.FieldTypeNumber:
 				query = query.Where(filterParam.FieldName, op, filterParam.FieldValue)
-			case FieldTypeString:
+			case enumutils.FieldTypeString:
 				query = query.Where(filterParam.FieldName, op, filterParam.FieldValue)
 			default:
 				return nil, fmt.Errorf("unexpected field type '%s'", filterParam.FieldType.String())
@@ -142,9 +143,9 @@ func ComposeUnpaginatedQuery(
 	if sort != nil {
 		for _, sortParam := range sort.SortBy {
 			switch sortParam.SortOrder {
-			case SortOrderAsc:
+			case enumutils.SortOrderAsc:
 				query = query.OrderBy(sortParam.FieldName, firestore.Asc)
-			case SortOrderDesc:
+			case enumutils.SortOrderDesc:
 				query = query.OrderBy(sortParam.FieldName, firestore.Desc)
 			}
 		}

@@ -219,6 +219,22 @@ func TestAuthenticateCustomFirebaseToken_Valid_Token(t *testing.T) {
 	assert.NotNilf(t, idTokens.IDToken, "expected ID token to be non nil")
 }
 
+func TestAuthenticateCustomFirebaseToken_INVALID_Token(t *testing.T) {
+	ctx := context.Background()
+	invalidUser, err := fb.GetOrCreateFirebaseUser(ctx, "invalid_email")
+	assert.NotNil(t, err)
+	assert.Nil(t, invalidUser)
+	user, err := fb.GetOrCreateFirebaseUser(ctx, fb.TestUserEmail)
+	assert.Nilf(t, err, "unexpected user retrieval error '%s'")
+	validToken, tokenErr := fb.CreateFirebaseCustomToken(ctx, user.UID)
+	assert.Nilf(t, tokenErr, "unexpected custom token creation error '%s'")
+	invalidToken, _ := fb.CreateFirebaseCustomToken(ctx, "invalid Id")
+	assert.NotEqual(t, validToken, invalidToken)
+	idTokens, validateErr := fb.AuthenticateCustomFirebaseToken("")
+	assert.Nil(t, idTokens)
+	assert.NotNil(t, validateErr)
+}
+
 func TestGenerateSafeIdentifier(t *testing.T) {
 	id := fb.GenerateSafeIdentifier()
 	assert.NotZero(t, id)

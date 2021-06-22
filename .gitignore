@@ -4,4 +4,5 @@ env.sh
 venv/
 coverage.*
 .gitmessage.txt
+fmtcoverage.html
 # bewell-app-*

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/firestore"
+	"github.com/savannahghi/enumutils"
 	fb "github.com/savannahghi/firebasetools"
 	"github.com/stretchr/testify/assert"
 )
@@ -108,49 +109,49 @@ func Test_validatePaginationParameters(t *testing.T) {
 
 func Test_opstring(t *testing.T) {
 	tests := map[string]struct {
-		op                   fb.Operation
+		op                   enumutils.Operation
 		expectedOutput       string
 		expectError          bool
 		expectedErrorMessage string
 	}{
 		"invalid_operation": {
-			op:                   fb.Operation("invalid unknown operation"),
+			op:                   enumutils.Operation("invalid unknown operation"),
 			expectedOutput:       "",
 			expectError:          true,
 			expectedErrorMessage: "unknown operation; did you forget to update this function after adding new operations in the schema?",
 		},
 		"less than": {
-			op:             fb.OperationLessThan,
+			op:             enumutils.OperationLessThan,
 			expectedOutput: "<",
 			expectError:    false,
 		},
 		"less than_or_equal_to": {
-			op:             fb.OperationLessThanOrEqualTo,
+			op:             enumutils.OperationLessThanOrEqualTo,
 			expectedOutput: "<=",
 			expectError:    false,
 		},
 		"equal_to": {
-			op:             fb.OperationEqual,
+			op:             enumutils.OperationEqual,
 			expectedOutput: "==",
 			expectError:    false,
 		},
 		"greater_than": {
-			op:             fb.OperationGreaterThan,
+			op:             enumutils.OperationGreaterThan,
 			expectedOutput: ">",
 			expectError:    false,
 		},
 		"greater_than_or_equal_to": {
-			op:             fb.OperationGreaterThanOrEqualTo,
+			op:             enumutils.OperationGreaterThanOrEqualTo,
 			expectedOutput: ">=",
 			expectError:    false,
 		},
 		"in": {
-			op:             fb.OperationIn,
+			op:             enumutils.OperationIn,
 			expectedOutput: "in",
 			expectError:    false,
 		},
 		"contains": {
-			op:             fb.OperationContains,
+			op:             enumutils.OperationContains,
 			expectedOutput: "array-contains",
 			expectError:    false,
 		},
@@ -202,7 +203,7 @@ func TestComposeUnpaginatedQuery(t *testing.T) {
 		SortBy: []*fb.SortParam{
 			{
 				FieldName: "name",
-				SortOrder: fb.SortOrderAsc,
+				SortOrder: enumutils.SortOrderAsc,
 			},
 		},
 	}
@@ -210,7 +211,7 @@ func TestComposeUnpaginatedQuery(t *testing.T) {
 		SortBy: []*fb.SortParam{
 			{
 				FieldName: "name",
-				SortOrder: fb.SortOrderDesc,
+				SortOrder: enumutils.SortOrderDesc,
 			},
 		},
 	}
@@ -218,8 +219,8 @@ func TestComposeUnpaginatedQuery(t *testing.T) {
 		FilterBy: []*fb.FilterParam{
 			{
 				FieldName:           "name",
-				FieldType:           fb.FieldTypeString,
-				ComparisonOperation: fb.Operation("not a valid operation"),
+				FieldType:           enumutils.FieldTypeString,
+				ComparisonOperation: enumutils.Operation("not a valid operation"),
 				FieldValue:          "val",
 			},
 		},
@@ -228,8 +229,8 @@ func TestComposeUnpaginatedQuery(t *testing.T) {
 		FilterBy: []*fb.FilterParam{
 			{
 				FieldName:           "deleted",
-				FieldType:           fb.FieldTypeBoolean,
-				ComparisonOperation: fb.OperationEqual,
+				FieldType:           enumutils.FieldTypeBoolean,
+				ComparisonOperation: enumutils.OperationEqual,
 				FieldValue:          "false",
 			},
 		},
@@ -238,8 +239,8 @@ func TestComposeUnpaginatedQuery(t *testing.T) {
 		FilterBy: []*fb.FilterParam{
 			{
 				FieldName:           "deleted",
-				FieldType:           fb.FieldTypeBoolean,
-				ComparisonOperation: fb.OperationEqual,
+				FieldType:           enumutils.FieldTypeBoolean,
+				ComparisonOperation: enumutils.OperationEqual,
 				FieldValue:          false,
 			},
 		},
@@ -248,8 +249,8 @@ func TestComposeUnpaginatedQuery(t *testing.T) {
 		FilterBy: []*fb.FilterParam{
 			{
 				FieldName:           "deleted",
-				FieldType:           fb.FieldTypeBoolean,
-				ComparisonOperation: fb.OperationEqual,
+				FieldType:           enumutils.FieldTypeBoolean,
+				ComparisonOperation: enumutils.OperationEqual,
 				FieldValue:          "bad format",
 			},
 		},
@@ -258,8 +259,8 @@ func TestComposeUnpaginatedQuery(t *testing.T) {
 		FilterBy: []*fb.FilterParam{
 			{
 				FieldName:           "count",
-				FieldType:           fb.FieldTypeInteger,
-				ComparisonOperation: fb.OperationGreaterThan,
+				FieldType:           enumutils.FieldTypeInteger,
+				ComparisonOperation: enumutils.OperationGreaterThan,
 				FieldValue:          0,
 			},
 		},
@@ -268,8 +269,8 @@ func TestComposeUnpaginatedQuery(t *testing.T) {
 		FilterBy: []*fb.FilterParam{
 			{
 				FieldName:           "count",
-				FieldType:           fb.FieldTypeInteger,
-				ComparisonOperation: fb.OperationGreaterThan,
+				FieldType:           enumutils.FieldTypeInteger,
+				ComparisonOperation: enumutils.OperationGreaterThan,
 				FieldValue:          "not a valid int",
 			},
 		},
@@ -278,8 +279,8 @@ func TestComposeUnpaginatedQuery(t *testing.T) {
 		FilterBy: []*fb.FilterParam{
 			{
 				FieldName:           "updated",
-				FieldType:           fb.FieldTypeTimestamp,
-				ComparisonOperation: fb.OperationGreaterThan,
+				FieldType:           enumutils.FieldTypeTimestamp,
+				ComparisonOperation: enumutils.OperationGreaterThan,
 				FieldValue:          time.Now(),
 			},
 		},
@@ -288,8 +289,8 @@ func TestComposeUnpaginatedQuery(t *testing.T) {
 		FilterBy: []*fb.FilterParam{
 			{
 				FieldName:           "numfield",
-				FieldType:           fb.FieldTypeNumber,
-				ComparisonOperation: fb.OperationLessThan,
+				FieldType:           enumutils.FieldTypeNumber,
+				ComparisonOperation: enumutils.OperationLessThan,
 				FieldValue:          1.0,
 			},
 		},
@@ -298,8 +299,8 @@ func TestComposeUnpaginatedQuery(t *testing.T) {
 		FilterBy: []*fb.FilterParam{
 			{
 				FieldName:           "name",
-				FieldType:           fb.FieldTypeString,
-				ComparisonOperation: fb.OperationEqual,
+				FieldType:           enumutils.FieldTypeString,
+				ComparisonOperation: enumutils.OperationEqual,
 				FieldValue:          "a string",
 			},
 		},
@@ -309,8 +310,8 @@ func TestComposeUnpaginatedQuery(t *testing.T) {
 		FilterBy: []*fb.FilterParam{
 			{
 				FieldName:           "name",
-				FieldType:           fb.FieldType("this is a strange field type"),
-				ComparisonOperation: fb.OperationEqual,
+				FieldType:           enumutils.FieldType("this is a strange field type"),
+				ComparisonOperation: enumutils.OperationEqual,
 				FieldValue:          "a string",
 			},
 		},
@@ -622,7 +623,7 @@ func TestQueryNodes(t *testing.T) {
 		SortBy: []*fb.SortParam{
 			{
 				FieldName: "name",
-				SortOrder: fb.SortOrderAsc,
+				SortOrder: enumutils.SortOrderAsc,
 			},
 		},
 	}

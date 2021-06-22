@@ -12,6 +12,9 @@ import (
 func TestShortenLink(t *testing.T) {
 	dynamicLinkDomain, err := server_utils.GetEnvVar(fb.FDLDomainEnvironmentVariableName)
 	assert.Nil(t, err)
+	faultyDynamicLinkDomain, err := server_utils.GetEnvVar("")
+	assert.NotNil(t, err)
+	assert.Equal(t, faultyDynamicLinkDomain, "")
 
 	type args struct {
 		ctx      context.Context
@@ -31,12 +34,26 @@ func TestShortenLink(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "missing longLink",
+			args: args{
+				ctx: context.Background(),
+				// TODO: MOVE this to an env var
+				longLink: "",
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := fb.ShortenLink(tt.args.ctx, tt.args.longLink)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ShortenLink() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if tt.wantErr {
+				assert.NotNil(t, err)
+				assert.Equal(t, "", got)
 				return
 			}
 			assert.Contains(t, got, dynamicLinkDomain)
