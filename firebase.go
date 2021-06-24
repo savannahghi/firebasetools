@@ -14,7 +14,7 @@ import (
 	"firebase.google.com/go/auth"
 	"firebase.google.com/go/messaging"
 	"github.com/lithammer/shortuuid"
-	"github.com/savannahghi/server_utils"
+	"github.com/savannahghi/serverutils"
 	"google.golang.org/api/option"
 )
 
@@ -51,7 +51,7 @@ type FirebaseClient struct{}
 
 // InitFirebase ensures that we have a working Firebase configuration
 func (fc *FirebaseClient) InitFirebase() (IFirebaseApp, error) {
-	appCreds, err := server_utils.GetEnvVar(GoogleApplicationCredentialsEnvVarName)
+	appCreds, err := serverutils.GetEnvVar(GoogleApplicationCredentialsEnvVarName)
 	if err != nil {
 		return firebase.NewApp(
 			context.Background(),
@@ -69,7 +69,7 @@ func (fc *FirebaseClient) InitFirebase() (IFirebaseApp, error) {
 // If successful, a pointer to the ID token is returned
 // Otherwise, an error is returned
 func AuthenticateCustomFirebaseToken(customAuthToken string) (*FirebaseUserTokens, error) {
-	apiKey, apiKeyErr := server_utils.GetEnvVar(FirebaseWebAPIKeyEnvVarName)
+	apiKey, apiKeyErr := serverutils.GetEnvVar(FirebaseWebAPIKeyEnvVarName)
 	if apiKeyErr != nil {
 		return nil, apiKeyErr
 	}
