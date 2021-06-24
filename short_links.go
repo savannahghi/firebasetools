@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/savannahghi/server_utils"
+	"github.com/savannahghi/serverutils"
 	"google.golang.org/api/firebasedynamiclinks/v1"
 )
 
@@ -15,7 +15,7 @@ func ShortenLink(ctx context.Context, longLink string) (string, error) {
 		return "", fmt.Errorf("unable to initialize Firebase Dynamic Links service: %w", err)
 	}
 
-	dynamicLinkDomain, err := server_utils.GetEnvVar(FDLDomainEnvironmentVariableName)
+	dynamicLinkDomain, err := serverutils.GetEnvVar(FDLDomainEnvironmentVariableName)
 	if err != nil {
 		return "", fmt.Errorf("environment variable %s missing", FDLDomainEnvironmentVariableName)
 	}

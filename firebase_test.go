@@ -12,7 +12,7 @@ import (
 	"firebase.google.com/go/auth"
 	"github.com/google/uuid"
 	fb "github.com/savannahghi/firebasetools"
-	"github.com/savannahghi/server_utils"
+	"github.com/savannahghi/serverutils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -24,12 +24,12 @@ func TestMain(m *testing.M) {
 	os.Setenv("ENVIRONMENT", "staging")
 	err := os.Setenv("ROOT_COLLECTION_SUFFIX", "staging")
 	if err != nil {
-		if server_utils.IsDebug() {
+		if serverutils.IsDebug() {
 			log.Printf("can't set root collection suffix in env: %s", err)
 		}
 		os.Exit(-1)
 	}
-	existingDebug, err := server_utils.GetEnvVar("DEBUG")
+	existingDebug, err := serverutils.GetEnvVar("DEBUG")
 	if err != nil {
 		existingDebug = "false"
 	}

@@ -10,7 +10,7 @@ import (
 	"cloud.google.com/go/firestore"
 	"github.com/google/uuid"
 	"github.com/savannahghi/enumutils"
-	"github.com/savannahghi/server_utils"
+	"github.com/savannahghi/serverutils"
 	"google.golang.org/api/iterator"
 )
 
@@ -28,7 +28,7 @@ func GetCollectionName(n Node) string {
 
 // GetFirestoreEnvironmentSuffix get the env suffix where the app is running
 func GetFirestoreEnvironmentSuffix() string {
-	return server_utils.MustGetEnvVar("ROOT_COLLECTION_SUFFIX")
+	return serverutils.MustGetEnvVar("ROOT_COLLECTION_SUFFIX")
 }
 
 // SuffixCollection adds a suffix to the collection name. This will aid in separating

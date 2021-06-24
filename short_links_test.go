@@ -5,14 +5,14 @@ import (
 	"testing"
 
 	fb "github.com/savannahghi/firebasetools"
-	"github.com/savannahghi/server_utils"
+	"github.com/savannahghi/serverutils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestShortenLink(t *testing.T) {
-	dynamicLinkDomain, err := server_utils.GetEnvVar(fb.FDLDomainEnvironmentVariableName)
+	dynamicLinkDomain, err := serverutils.GetEnvVar(fb.FDLDomainEnvironmentVariableName)
 	assert.Nil(t, err)
-	faultyDynamicLinkDomain, err := server_utils.GetEnvVar("")
+	faultyDynamicLinkDomain, err := serverutils.GetEnvVar("")
 	assert.NotNil(t, err)
 	assert.Equal(t, faultyDynamicLinkDomain, "")
 
