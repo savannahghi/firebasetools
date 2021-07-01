@@ -60,111 +60,6 @@ func TestInitFirebase(t *testing.T) {
 	assert.NotNil(t, fb)
 }
 
-// GetAuthenticatedContext returns a logged in context, useful for test purposes
-func GetAuthenticatedContext(t *testing.T) context.Context {
-	ctx := context.Background()
-	authToken := getAuthToken(ctx, t)
-	authenticatedContext := context.WithValue(ctx, fb.AuthTokenContextKey, authToken)
-	return authenticatedContext
-}
-
-func GetFirestoreClient(t *testing.T) *firestore.Client {
-	fc := &fb.FirebaseClient{}
-	firebaseApp, err := fc.InitFirebase()
-	assert.Nil(t, err)
-
-	ctx := GetAuthenticatedContext(t)
-	firestoreClient, err := firebaseApp.Firestore(ctx)
-	assert.Nil(t, err)
-	assert.NotNil(t, firestoreClient)
-	return firestoreClient
-}
-
-// GetAuthenticatedContextAndToken returns a logged in context and ID token.
-// It is useful for test purposes
-func GetAuthenticatedContextAndToken(t *testing.T) (context.Context, *auth.Token) {
-	ctx := context.Background()
-	authToken := getAuthToken(ctx, t)
-	authenticatedContext := context.WithValue(ctx, fb.AuthTokenContextKey, authToken)
-	return authenticatedContext, authToken
-}
-
-func getAuthToken(ctx context.Context, t *testing.T) *auth.Token {
-	authToken, _ := getAuthTokenAndBearerToken(ctx, t)
-	return authToken
-}
-
-func getAuthTokenAndBearerToken(ctx context.Context, t *testing.T) (*auth.Token, string) {
-	user, userErr := fb.GetOrCreateFirebaseUser(ctx, fb.TestUserEmail)
-	assert.Nil(t, userErr)
-	assert.NotNil(t, user)
-
-	customToken, tokenErr := fb.CreateFirebaseCustomToken(ctx, user.UID)
-	assert.Nil(t, tokenErr)
-	assert.NotNil(t, customToken)
-
-	idTokens, idErr := fb.AuthenticateCustomFirebaseToken(customToken)
-	assert.Nil(t, idErr)
-	assert.NotNil(t, idTokens)
-
-	bearerToken := idTokens.IDToken
-	authToken, err := fb.ValidateBearerToken(ctx, bearerToken)
-	assert.Nil(t, err)
-	assert.NotNil(t, authToken)
-
-	return authToken, bearerToken
-}
-
-func GetOrCreateAnonymousUser(ctx context.Context) (*auth.UserRecord, error) {
-	authClient, err := fb.GetFirebaseAuthClient(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("unable to get or create Firebase client: %w", err)
-	}
-	anonymousUserUID := "AgkGYKUsRifO2O9fTLDuVCMr2hb2" // This is an anonymous user
-
-	existingUser, userErr := authClient.GetUser(ctx, anonymousUserUID)
-
-	if userErr == nil {
-		return existingUser, nil
-	}
-
-	params := (&auth.UserToCreate{})
-	newUser, createErr := authClient.CreateUser(ctx, params)
-	if createErr != nil {
-		return nil, createErr
-	}
-	return newUser, nil
-}
-
-// GetAnonymousContext returns an anonymous logged in context, useful for test purposes
-func GetAnonymousContext(t *testing.T) context.Context {
-	ctx := context.Background()
-	authToken := getAnonymousAuthToken(ctx, t)
-	authenticatedContext := context.WithValue(ctx, fb.AuthTokenContextKey, authToken)
-	return authenticatedContext
-}
-
-func getAnonymousAuthToken(ctx context.Context, t *testing.T) *auth.Token {
-	user, userErr := GetOrCreateAnonymousUser(ctx)
-	assert.Nil(t, userErr)
-	assert.NotNil(t, user)
-
-	customToken, tokenErr := fb.CreateFirebaseCustomToken(ctx, user.UID)
-	assert.Nil(t, tokenErr)
-	assert.NotNil(t, customToken)
-
-	idTokens, idErr := fb.AuthenticateCustomFirebaseToken(customToken)
-	assert.Nil(t, idErr)
-	assert.NotNil(t, idTokens)
-
-	bearerToken := idTokens.IDToken
-	authToken, err := fb.ValidateBearerToken(ctx, bearerToken)
-	assert.Nil(t, err)
-	assert.NotNil(t, authToken)
-
-	return authToken
-}
-
 func TestGetOrCreateFirebaseUser(t *testing.T) {
 	ctx := context.Background()
 	tests := []struct {
@@ -241,7 +136,7 @@ func TestGenerateSafeIdentifier(t *testing.T) {
 }
 
 func TestUpdateRecordOnFirestore(t *testing.T) {
-	firestoreClient := GetFirestoreClient(t)
+	firestoreClient := fb.GetFirestoreClientTestUtil(t)
 	collection := "integration_test_collection"
 	data := map[string]string{
 		"a_key_for_testing": uuid.New().String(),
@@ -296,7 +191,7 @@ func TestUpdateRecordOnFirestore(t *testing.T) {
 }
 
 func TestGetUserTokenFromContext(t *testing.T) {
-	authenticatedContext, authToken := GetAuthenticatedContextAndToken(t)
+	authenticatedContext, authToken := fb.GetAuthenticatedContextAndToken(t)
 	type args struct {
 		ctx context.Context
 	}
@@ -362,7 +257,7 @@ func TestCheckIsAnonymousUser(t *testing.T) {
 		{
 			name: "Anonymous user",
 			args: args{
-				ctx: GetAnonymousContext(t),
+				ctx: fb.GetAnonymousContext(t),
 			},
 			want:    true,
 			wantErr: false,
@@ -370,7 +265,7 @@ func TestCheckIsAnonymousUser(t *testing.T) {
 		{
 			name: "Known user",
 			args: args{
-				ctx: GetAuthenticatedContext(t),
+				ctx: fb.GetAuthenticatedContext(t),
 			},
 			want:    false,
 			wantErr: false,

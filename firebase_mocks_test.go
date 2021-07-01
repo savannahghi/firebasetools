@@ -11,7 +11,7 @@ import (
 
 func TestAuth(t *testing.T) {
 	ctx := context.Background()
-	authToken := getAuthToken(ctx, t)
+	authToken := firebasetools.GetAuthToken(ctx, t)
 	authenticatedContext := context.WithValue(ctx, firebasetools.AuthTokenContextKey, authToken)
 	fb := firebasetools.MockFirebaseApp{}
 	_, err := fb.Auth(authenticatedContext)
@@ -20,7 +20,7 @@ func TestAuth(t *testing.T) {
 
 func TestRevokeRefreshTokens(t *testing.T) {
 	ctx := context.Background()
-	authToken := getAuthToken(ctx, t)
+	authToken := firebasetools.GetAuthToken(ctx, t)
 	authenticatedContext := context.WithValue(ctx, firebasetools.AuthTokenContextKey, authToken)
 	fb := firebasetools.MockFirebaseApp{}
 	err := fb.RevokeRefreshTokens(authenticatedContext, "string")
@@ -29,7 +29,7 @@ func TestRevokeRefreshTokens(t *testing.T) {
 
 func TestRevokeFirestore(t *testing.T) {
 	ctx := context.Background()
-	authToken := getAuthToken(ctx, t)
+	authToken := firebasetools.GetAuthToken(ctx, t)
 	authenticatedContext := context.WithValue(ctx, firebasetools.AuthTokenContextKey, authToken)
 	fb := firebasetools.MockFirebaseApp{}
 	_, err := fb.Firestore(authenticatedContext)
@@ -38,7 +38,7 @@ func TestRevokeFirestore(t *testing.T) {
 
 func TestMessaging(t *testing.T) {
 	ctx := context.Background()
-	authToken := getAuthToken(ctx, t)
+	authToken := firebasetools.GetAuthToken(ctx, t)
 	authenticatedContext := context.WithValue(ctx, firebasetools.AuthTokenContextKey, authToken)
 	fb := firebasetools.MockFirebaseApp{}
 	_, err := fb.Messaging(authenticatedContext)
