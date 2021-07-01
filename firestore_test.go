@@ -188,7 +188,7 @@ func TestGetFirestoreClient(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := fb.GetFirestoreClient(tt.args.ctx)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("GetFirestoreClient() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("GetFirestoreClientTestUtil() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			assert.NotNil(t, got)
@@ -756,8 +756,8 @@ func TestDeleteNode(t *testing.T) {
 }
 
 func TestDeleteCollection(t *testing.T) {
-	ctx := GetAuthenticatedContext(t)
-	firestoreClient := GetFirestoreClient(t)
+	ctx := fb.GetAuthenticatedContext(t)
+	firestoreClient := fb.GetFirestoreClientTestUtil(t)
 	collection := "test_collection_deletion"
 	data := map[string]string{
 		"a_key_for_testing": "random-test-key-value",
