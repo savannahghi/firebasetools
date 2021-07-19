@@ -26,7 +26,7 @@ const (
 	HTTPClientTimeoutSecs = 10
 
 	// TestUserEmail is used by integration tests
-	TestUserEmail = "be.well@bewell.co.ke"
+	TestUserEmail = "test@bewell.co.ke"
 
 	// FDLDomainEnvironmentVariableName is firebase dynamic link domain/URL
 	// e.g https://example-one.page.link or https://example-two.page.link
