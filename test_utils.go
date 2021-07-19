@@ -18,6 +18,7 @@ func GetAuthenticatedContext(t *testing.T) context.Context {
 	return authenticatedContext
 }
 
+// GetFirestoreClientTestUtil ...
 func GetFirestoreClientTestUtil(t *testing.T) *firestore.Client {
 	fc := &FirebaseClient{}
 	firebaseApp, err := fc.InitFirebase()
@@ -39,6 +40,7 @@ func GetAuthenticatedContextAndToken(t *testing.T) (context.Context, *auth.Token
 	return authenticatedContext, authToken
 }
 
+// GetAuthToken ...
 func GetAuthToken(ctx context.Context, t *testing.T) *auth.Token {
 	authToken, _ := getAuthTokenAndBearerToken(ctx, t)
 	return authToken
@@ -65,6 +67,8 @@ func getAuthTokenAndBearerToken(ctx context.Context, t *testing.T) (*auth.Token,
 	return authToken, bearerToken
 }
 
+// GetOrCreateAnonymousUser creates an anonymous user
+// For documentation and test purposes only
 func GetOrCreateAnonymousUser(ctx context.Context) (*auth.UserRecord, error) {
 	authClient, err := GetFirebaseAuthClient(ctx)
 	if err != nil {

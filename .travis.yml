@@ -25,7 +25,7 @@ notifications:
 
 env:
   global:
-    - GOOGLE_APPLICATION_CREDENTIALS=bewell-app-ci-account.json
+    - GOOGLE_APPLICATION_CREDENTIALS=ci-account.json
     - CLOUDSDK_CORE_DISABLE_PROMPTS=1 # prevent gcloud from prompting
 
 # Anything in before_script that returns a nonzero exit code will flunk the
@@ -42,9 +42,10 @@ before_script:
   - go get -u github.com/client9/misspell/cmd/misspell
   - go get -u github.com/gordonklaus/ineffassign
   - go get github.com/fzipp/gocyclo
+  - go get github.com/stretchr/testify/assert@v1.7.0
 
 before_install:
-  - openssl aes-256-cbc -K $encrypted_2677e8e89b3e_key -iv $encrypted_2677e8e89b3e_iv -in bewell-app-ci-account.json.enc -out bewell-app-ci-account.json -d
+  - openssl aes-256-cbc -K $encrypted_0e182b32a9e4_key -iv $encrypted_0e182b32a9e4_iv -in ci-account.json.enc -out ci-account.json -d
 
 # script always runs to completion (set +e). If we have linter issues AND a
 # failing test, we want to see both. Configure golangci-lint with a
