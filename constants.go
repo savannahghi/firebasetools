@@ -42,4 +42,7 @@ const (
 	// DefaultRESTAPIPageSize is the page size to use when calling Slade REST API services if the
 	// client does not specify a page size
 	DefaultRESTAPIPageSize = 100
+
+	// MaxRestAPIPageSize is the largest page size we'll request
+	MaxRestAPIPageSize = 250
 )
