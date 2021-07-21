@@ -12,5 +12,6 @@ require (
 	github.com/savannahghi/errorcodeutil v0.0.1
 	github.com/savannahghi/serverutils v0.0.2
 	github.com/stretchr/testify v1.7.0
+	github.com/vmihailenco/msgpack v4.0.4+incompatible
 	google.golang.org/api v0.48.0
 )
