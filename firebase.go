@@ -252,3 +252,13 @@ func CheckIsAnonymousUser(ctx context.Context) (bool, error) {
 
 	return true, nil
 }
+
+// GetLoggedInUserUID retrieves the logged in user's Firebase UID from the
+// supplied context and returns an error if it does not succeed
+func GetLoggedInUserUID(ctx context.Context) (string, error) {
+	authToken, err := GetUserTokenFromContext(ctx)
+	if err != nil {
+		return "", fmt.Errorf("auth token not found in context: %w", err)
+	}
+	return authToken.UID, nil
+}

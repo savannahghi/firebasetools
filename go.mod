@@ -9,6 +9,7 @@ require (
 	github.com/google/uuid v1.2.0
 	github.com/lithammer/shortuuid v3.0.0+incompatible
 	github.com/savannahghi/enumutils v0.0.0-20210622094023-d347744e1825
+	github.com/savannahghi/errorcodeutil v0.0.1
 	github.com/savannahghi/serverutils v0.0.2
 	github.com/stretchr/testify v1.7.0
 	google.golang.org/api v0.48.0
