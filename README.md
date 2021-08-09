@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.com/savannahghi/firebasetools.svg?branch=main)](https://travis-ci.com/savannahghi/firebasetools)
 [![Maintained](https://img.shields.io/badge/Maintained-Actively-informational.svg?style=for-the-badge)](https://shields.io/)
+![Linting and Tests](https://github.com/savannahghi/firebasetools/actions/workflows/ci.yml/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/savannahghi/firebasetools/badge.svg?branch=main)](https://coveralls.io/github/savannahghi/firebasetools?branch=main)
 # Firebase Tools
 firebasetools is a Go client library for accessing the Google Firebase and Firestore.
 
