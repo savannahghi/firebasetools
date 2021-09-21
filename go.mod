@@ -9,9 +9,9 @@ require (
 	github.com/google/uuid v1.2.0
 	github.com/lithammer/shortuuid v3.0.0+incompatible
 	github.com/savannahghi/enumutils v0.0.3
-	github.com/savannahghi/errorcodeutil v0.0.1
 	github.com/savannahghi/serverutils v0.0.4
 	github.com/stretchr/testify v1.7.0
 	github.com/vmihailenco/msgpack v4.0.4+incompatible
 	google.golang.org/api v0.48.0
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

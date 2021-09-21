@@ -162,24 +162,22 @@ func QueryNodes(
 		return nil, nil, err
 	}
 	query := *queryPtr
-
 	// pagination
 	pageSize := DefaultPageSize
 	if pagination != nil {
 		if pagination.First > 0 {
 			if pagination.After != "" {
-				query = query.StartAfter(pagination.After)
+				query = query.OrderBy("id", firestore.Asc).StartAfter(pagination.After).Limit(pagination.First)
 			}
 			pageSize = pagination.First
+			query = query.Limit(pageSize)
 		}
 		if pagination.Last > 0 {
 			if pagination.Before != "" {
-				query = query.EndBefore(pagination.Before)
+				query = query.OrderBy("id", firestore.Asc).EndAt(pagination.Before).LimitToLast(pagination.Last)
 			}
-			pageSize = pagination.Last
 		}
 	}
-	query = query.Limit(pageSize)
 
 	// start with a default PageInfo
 	docs, err := query.Documents(ctx).GetAll()
@@ -194,7 +192,10 @@ func QueryNodes(
 
 	// check if there is a next page
 	pageInfo := &PageInfo{
+		HasNextPage:     false,
 		HasPreviousPage: pagination != nil && pagination.After != "",
+		StartCursor:     new(string),
+		EndCursor:       new(string),
 	}
 	if len(docs) > 0 {
 		secondQueryPtr, err := ComposeUnpaginatedQuery(ctx, filter, sort, node)
