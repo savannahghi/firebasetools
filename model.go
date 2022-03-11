@@ -172,3 +172,27 @@ func (c *Model) SetID(id string) {
 
 //IsEntity ...
 func (c Model) IsEntity() {}
+
+// LoginResponse is used to (de)serialize the result of a successful login
+// You can add more or remove fields to suit your organization/project needs
+type LoginResponse struct {
+	CustomToken   string `json:"custom_token"`
+	ExpiresIn     int    `json:"expires_in"`
+	IDToken       string `json:"id_token"`
+	RefreshToken  string `json:"refresh_token"`
+	UID           string `json:"uid"`
+	Email         string `json:"email"`
+	DisplayName   string `json:"display_name"`
+	EmailVerified bool   `json:"email_verified"`
+	PhoneNumber   string `json:"phone_number"`
+	PhotoURL      string `json:"photo_url"`
+	Disabled      bool   `json:"disabled"`
+	TenantID      string `json:"tenant_id"`
+	ProviderID    string `json:"provider_id"`
+}
+
+// LoginCredentials is used to (de)serialize the login username and password
+type LoginCredentials struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
