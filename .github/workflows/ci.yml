@@ -62,6 +62,7 @@ jobs:
           go get cloud.google.com/go/trace/apiv2 
           go get cloud.google.com/go/errorreporting
           go get cloud.google.com/go/profiler
+          go get firebase.google.com/go/storage
 
       - name: Run lint and test
         run: |
