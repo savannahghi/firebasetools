@@ -114,9 +114,6 @@ type PageInfo struct {
 	EndCursor       *string `json:"endCursor"`
 }
 
-//IsEntity ...
-func (p PageInfo) IsEntity() {}
-
 // NewString returns a pointer to the supplied string.
 func NewString(s string) *string {
 	return &s
