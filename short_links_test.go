@@ -30,7 +30,7 @@ func TestShortenLink(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 				// TODO: MOVE this to an env var
-				longLink: "https://console.cloud.google.com/run/detail/europe-west1/api-gateway/revisions?project=bewell-app-testing",
+				longLink: "europe-west1-sghi-307909.cloudfunctions.net",
 			},
 			wantErr: false,
 		},

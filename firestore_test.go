@@ -678,7 +678,7 @@ func TestQueryNodes(t *testing.T) {
 				sort:   nil,
 				node:   &fb.Model{},
 			},
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name: "With sort",

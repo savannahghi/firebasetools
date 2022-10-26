@@ -23,55 +23,37 @@ jobs:
   lint_and_test:
     strategy:
       matrix:
-        go-version: [1.16.x]
+        go-version: [1.18.x]
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 80
     steps:
-      - uses: actions/checkout@v2
-      - uses: google-github-actions/setup-gcloud@master
+      - uses: actions/checkout@v3.1.0
+      - uses: 'google-github-actions/auth@v0'
         with:
-            project_id: ${{ secrets.GOOGLE_CLOUD_PROJECT }}
-            service_account_key: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
-            export_default_credentials: true
+          credentials_json: '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}'
+          project_id: ${{ secrets.GOOGLE_CLOUD_PROJECT }}
       - name: Install Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3.3.1
         with:
           go-version: ${{ matrix.go-version }}
 
       - name: Install Go dependencies
         run: |
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.37.1
-          go get -u github.com/kisielk/errcheck
-          go get -u golang.org/x/lint/golint
-          go get -u honnef.co/go/tools/cmd/staticcheck
-          go get -u github.com/axw/gocov/gocov
-          go get -u github.com/securego/gosec/cmd/gosec
-          go get -u github.com/ory/go-acc
-          go get -u github.com/client9/misspell/cmd/misspell
-          go get -u github.com/gordonklaus/ineffassign
-          go get github.com/fzipp/gocyclo
-          go get github.com/stretchr/testify/assert@v1.7.0
-          go get github.com/ory/go-acc
-          go get golang.org/x/oauth2/internal
-          go get google.golang.org/api/transport/http
-          go get google.golang.org/grpc/internal/transport
-          go get google.golang.org/grpc
-          go get cloud.google.com/go/monitoring/apiv3/v2
-          go get cloud.google.com/go/container/apiv1
-          go get cloud.google.com/go/trace/apiv2 
-          go get cloud.google.com/go/errorreporting
-          go get cloud.google.com/go/profiler
-          go get firebase.google.com/go/storage
+          curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.13.1
+          go install honnef.co/go/tools/cmd/staticcheck@2022.1
+          go install github.com/ory/go-acc@latest
+          go install github.com/axw/gocov/gocov@latest
+          go install github.com/kisielk/errcheck@latest
+          
 
       - name: Run lint and test
         run: |
           staticcheck ./...
           go fmt $(go list ./... | grep -v /vendor/)
           go vet $(go list ./... | grep -v /vendor/)
-          golint -set_exit_status $(go list ./... | grep -v /vendor/)
           errcheck -ignore 'os:.*,' $(go list ./... | grep -v /vendor/)
-          misspell -error .
           gosec -exclude=G304,G101 ./...
           go-acc -o coverage.txt --ignore generated,cmd  ./... -- -timeout 60m
           grep -v "generated.go" coverage.txt > coverage.out
