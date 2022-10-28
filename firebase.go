@@ -262,3 +262,29 @@ func GetLoggedInUserUID(ctx context.Context) (string, error) {
 	}
 	return authToken.UID, nil
 }
+
+// CreateFirebaseCustomTokenWithClaims creates a custom auth token for the user with the
+// indicated UID with additional claims
+func CreateFirebaseCustomTokenWithClaims(ctx context.Context, uid string, claims map[string]interface{}) (string, error) {
+	fc := &FirebaseClient{}
+	firebaseApp, err := fc.InitFirebase()
+	if err != nil {
+		return "", fmt.Errorf("unable to initialize Firebase app: %w", err)
+	}
+	authClient, err := firebaseApp.Auth(ctx)
+	if err != nil {
+		return "", fmt.Errorf("unable to create custom Firebase token: %w", err)
+	}
+	return authClient.CustomTokenWithClaims(ctx, uid, claims)
+}
+
+// GetLoggedInUserClaims retrieves the logged in user's token custom claims from the
+// supplied context and returns an error if it does not succeed
+func GetLoggedInUserClaims(ctx context.Context) (map[string]interface{}, error) {
+	authToken, err := GetUserTokenFromContext(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("auth token not found in context: %w", err)
+	}
+
+	return authToken.Claims, nil
+}

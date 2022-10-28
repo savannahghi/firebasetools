@@ -284,3 +284,112 @@ func TestCheckIsAnonymousUser(t *testing.T) {
 		})
 	}
 }
+
+func TestCreateFirebaseCustomTokenWithClaims(t *testing.T) {
+	user, err := fb.GetOrCreateFirebaseUser(context.Background(), fb.TestUserEmail)
+	if err != nil {
+		t.Errorf("unable to create Firebase user for email %v, error %v", fb.TestUserEmail, err)
+	}
+
+	type args struct {
+		ctx    context.Context
+		uid    string
+		claims map[string]interface{}
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "happy case: create custom token",
+			args: args{
+				ctx: context.Background(),
+				uid: user.UID,
+				claims: map[string]interface{}{
+					"organisationID": uuid.NewString(),
+				},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := fb.CreateFirebaseCustomTokenWithClaims(tt.args.ctx, tt.args.uid, tt.args.claims)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("CreateFirebaseCustomTokenWithClaims() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+		})
+	}
+}
+
+func TestGetLoggedInUserClaims(t *testing.T) {
+	user, err := fb.GetOrCreateFirebaseUser(context.Background(), fb.TestUserEmail)
+	if err != nil {
+		t.Errorf("unable to create Firebase user for email %v, error %v", fb.TestUserEmail, err)
+	}
+
+	orgID := uuid.NewString()
+	claims := map[string]interface{}{
+		"organisationID": orgID,
+	}
+	customToken, err := fb.CreateFirebaseCustomTokenWithClaims(context.Background(), user.UID, claims)
+	if err != nil {
+		t.Errorf("unable to create custom token for email %v, error %v", fb.TestUserEmail, err)
+	}
+
+	userTokens, err := fb.AuthenticateCustomFirebaseToken(customToken)
+	if err != nil {
+		t.Errorf("unable to create id token for custom token, error %v", err)
+	}
+
+	authToken, err := fb.ValidateBearerToken(context.Background(), userTokens.IDToken)
+	if err != nil {
+		t.Errorf("unable to validate token, error %v", err)
+	}
+
+	type args struct {
+		ctx context.Context
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    map[string]interface{}
+		wantErr bool
+	}{
+		{
+			name: "happy case: retrieve custom claims",
+			args: args{
+				ctx: context.WithValue(context.Background(), fb.AuthTokenContextKey, authToken),
+			},
+			want: map[string]interface{}{
+				"organisationID": orgID,
+			},
+			wantErr: false,
+		},
+		{
+			name: "sad case: context without token",
+			args: args{
+				ctx: context.Background(),
+			},
+			want:    nil,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := fb.GetLoggedInUserClaims(tt.args.ctx)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetLoggedInUserClaims() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			if !tt.wantErr {
+				if !assert.NotNil(t, got) {
+					t.Errorf("GetLoggedInUserClaims() = %v, want %v", got, tt.want)
+				}
+			}
+		})
+	}
+}
