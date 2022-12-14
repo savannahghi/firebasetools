@@ -34,7 +34,7 @@ jobs:
           credentials_json: '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}'
           project_id: ${{ secrets.GOOGLE_CLOUD_PROJECT }}
       - name: Install Go
-        uses: actions/setup-go@v3.3.1
+        uses: actions/setup-go@v3.5.0
         with:
           go-version: ${{ matrix.go-version }}
 
