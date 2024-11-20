@@ -11,6 +11,8 @@ import (
 	"github.com/savannahghi/enumutils"
 )
 
+const defaultPageCount = 10
+
 // QueryParam is an interface used for filter and sort parameters
 type QueryParam interface {
 	ToURLValues() (values url.Values)
@@ -18,21 +20,48 @@ type QueryParam interface {
 
 // PaginationInput represents paging parameters
 type PaginationInput struct {
-	First  int    `json:"first"`
-	Last   int    `json:"last"`
+	First  *int   `json:"first"`
+	Last   *int   `json:"last"`
 	After  string `json:"after"`
 	Before string `json:"before"`
 }
 
-//IsEntity ...
+// IsEntity ...
 func (p PaginationInput) IsEntity() {}
+
+func (p *PaginationInput) Validate() error {
+	if p.First != nil && p.Last != nil {
+		return fmt.Errorf("cannot provide both first and last")
+	}
+
+	if p.First != nil {
+		first := *p.First
+		if first <= 0 {
+			return fmt.Errorf("first cannot be less than 0")
+		}
+	}
+
+	if p.Last != nil {
+		last := *p.Last
+		if last <= 0 {
+			return fmt.Errorf("last cannot be less than 0")
+		}
+	}
+
+	if p.First == nil && p.Last == nil {
+		limit := defaultPageCount
+		p.First = &limit
+	}
+
+	return nil
+}
 
 // SortInput is a generic container for strongly typed sorting parameters
 type SortInput struct {
 	SortBy []*SortParam `json:"sortBy"`
 }
 
-//IsEntity ...
+// IsEntity ...
 func (s SortInput) IsEntity() {}
 
 // SortParam represents a single field sort parameter
@@ -41,7 +70,7 @@ type SortParam struct {
 	SortOrder enumutils.SortOrder `json:"sortOrder"`
 }
 
-//IsEntity ...
+// IsEntity ...
 func (s SortParam) IsEntity() {}
 
 // FilterInput is s generic container for strongly type filter parameters
@@ -50,7 +79,7 @@ type FilterInput struct {
 	FilterBy []*FilterParam `json:"filterBy"`
 }
 
-//IsEntity ...
+// IsEntity ...
 func (f FilterInput) IsEntity() {}
 
 // FilterParam represents a single field filter parameter
@@ -61,7 +90,7 @@ type FilterParam struct {
 	FieldValue          interface{}         `json:"fieldValue"`
 }
 
-//IsEntity ...
+// IsEntity ...
 func (f FilterParam) IsEntity() {}
 
 // FirebaseRefreshResponse is used to (de)serialize the results of a successful Firebase token refresh
@@ -114,7 +143,7 @@ type PageInfo struct {
 	EndCursor       *string `json:"endCursor"`
 }
 
-//IsEntity ...
+// IsEntity ...
 func (p PageInfo) IsEntity() {}
 
 // NewString returns a pointer to the supplied string.
@@ -170,7 +199,7 @@ func (c *Model) SetID(id string) {
 	c.ID = id
 }
 
-//IsEntity ...
+// IsEntity ...
 func (c Model) IsEntity() {}
 
 // LoginResponse is used to (de)serialize the result of a successful login

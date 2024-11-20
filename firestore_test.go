@@ -56,46 +56,42 @@ func Test_validatePaginationParameters(t *testing.T) {
 	}{
 		"first_last_specified": {
 			pagination: &fb.PaginationInput{
-				First: first,
-				Last:  last,
+				First: &first,
+				Last:  &last,
 			},
 			expectError:          true,
-			expectedErrorMessage: "if `first` is specified for pagination, `last` cannot be specified",
+			expectedErrorMessage: "cannot provide both first and last",
 		},
 		"first_only": {
 			pagination: &fb.PaginationInput{
-				First: first,
+				First: &first,
 			},
 			expectError: false,
 		},
 		"last_only": {
 			pagination: &fb.PaginationInput{
-				Last: last,
+				Last: &last,
 			},
 			expectError: false,
 		},
 		"first_and_after": {
 			pagination: &fb.PaginationInput{
-				First: first,
+				First: &first,
 				After: after,
 			},
 			expectError: false,
 		},
 		"last_and_before": {
 			pagination: &fb.PaginationInput{
-				Last:   last,
+				Last:   &last,
 				Before: before,
 			},
-			expectError: false,
-		},
-		"nil_pagination": {
-			pagination:  nil,
 			expectError: false,
 		},
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			err := fb.ValidatePaginationParameters(tc.pagination)
+			err := tc.pagination.Validate()
 			if tc.expectError {
 				assert.NotNil(t, err)
 				assert.Contains(t, err.Error(), tc.expectedErrorMessage)
@@ -609,6 +605,9 @@ func TestRetrieveNode(t *testing.T) {
 }
 
 func TestQueryNodes(t *testing.T) {
+	first := 10
+	last := 1
+
 	ctx := context.Background()
 	node := &fb.Model{
 		Name:        "test model instance",
@@ -657,7 +656,7 @@ func TestQueryNodes(t *testing.T) {
 			args: args{
 				ctx: ctx,
 				pagination: &fb.PaginationInput{
-					First: 10,
+					First: &first,
 					After: id,
 				},
 				filter: nil,
@@ -671,7 +670,7 @@ func TestQueryNodes(t *testing.T) {
 			args: args{
 				ctx: ctx,
 				pagination: &fb.PaginationInput{
-					Last:   1,
+					Last:   &last,
 					Before: id,
 				},
 				filter: nil,

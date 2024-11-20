@@ -76,11 +76,16 @@ func GetAPIPaginationParams(pagination *PaginationInput) (url.Values, error) {
 	// `first` will supersede `last`
 	var err error
 	pageSize := DefaultRESTAPIPageSize
-	if pagination.Last > 0 {
-		pageSize = pagination.Last
+
+	err = pagination.Validate()
+	if err != nil {
+		return url.Values{}, nil
 	}
-	if pagination.First > 0 {
-		pageSize = pagination.First
+
+	if pagination.Last != nil {
+		pageSize = *pagination.Last
+	} else if pagination.First != nil {
+		pageSize = *pagination.First
 	}
 
 	// For these "pass through APIs", "after" and "before" should be parseable as ints

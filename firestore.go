@@ -37,20 +37,6 @@ func SuffixCollection(c string) string {
 	return fmt.Sprintf("%v_bewell_%v", c, GetFirestoreEnvironmentSuffix())
 }
 
-// ValidatePaginationParameters ensures that the supplied pagination parameters make sense
-func ValidatePaginationParameters(pagination *PaginationInput) error {
-	if pagination == nil {
-		return nil // not having pagination is not a fatal error
-	}
-
-	// if `first` is specified, `last` cannot be specified
-	if pagination.First > 0 && pagination.Last > 0 {
-		return fmt.Errorf("if `first` is specified for pagination, `last` cannot be specified")
-	}
-
-	return nil
-}
-
 // OpString translates between an Operation enum value and the appropriate firestore
 // query operator
 func OpString(op enumutils.Operation) (string, error) {
@@ -165,16 +151,16 @@ func QueryNodes(
 	// pagination
 	pageSize := DefaultPageSize
 	if pagination != nil {
-		if pagination.First > 0 {
+		if pagination.First != nil {
 			if pagination.After != "" {
-				query = query.OrderBy("id", firestore.Asc).StartAfter(pagination.After).Limit(pagination.First)
+				query = query.OrderBy("id", firestore.Asc).StartAfter(pagination.After).Limit(*pagination.First)
 			}
-			pageSize = pagination.First
+			pageSize = *pagination.First
 			query = query.Limit(pageSize)
 		}
-		if pagination.Last > 0 {
+		if pagination.Last != nil {
 			if pagination.Before != "" {
-				query = query.OrderBy("id", firestore.Asc).EndAt(pagination.Before).LimitToLast(pagination.Last)
+				query = query.OrderBy("id", firestore.Asc).EndAt(pagination.Before).LimitToLast(*pagination.Last)
 			}
 		}
 	}
